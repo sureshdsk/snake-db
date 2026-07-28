@@ -32,25 +32,46 @@ CRLF = b"\r\n"
 class SimpleString:
     value: str
 
+    def serialize(self) -> bytes:
+        return b"+" + self.value.encode() + CRLF
+
 
 @dataclass
 class Error:
     message: str
+
+    def serialize(self) -> bytes:
+        return b"-" + self.message.encode() + CRLF
 
 
 @dataclass
 class Integer:
     value: int
 
+    def serialize(self) -> bytes:
+        return b":" + str(self.value).encode() + CRLF
+
 
 @dataclass
 class BulkString:
     value: bytes | None  # None -> nil bulk string ($-1)
 
+    def serialize(self) -> bytes:
+        if self.value is None:
+            return b"$-1" + CRLF
+        return b"$" + str(len(self.value)).encode() + CRLF + self.value + CRLF
+
 
 @dataclass
 class Array:
     items: list[Reply] | None  # None -> nil array (*-1)
+
+    def serialize(self) -> bytes:
+        if self.items is None:
+            return b"*-1" + CRLF
+        parts = [b"*" + str(len(self.items)).encode() + CRLF]
+        parts += [item.serialize() for item in self.items]
+        return b"".join(parts)
 
 
 Reply = SimpleString | Error | Integer | BulkString | Array
@@ -58,28 +79,6 @@ Reply = SimpleString | Error | Integer | BulkString | Array
 OK = SimpleString("OK")
 PONG = SimpleString("PONG")
 NIL = BulkString(None)
-
-
-def serialize(reply: Reply) -> bytes:
-    """Serialize a reply value into RESP2 bytes."""
-    if isinstance(reply, SimpleString):
-        return b"+" + reply.value.encode() + CRLF
-    if isinstance(reply, Error):
-        return b"-" + reply.message.encode() + CRLF
-    if isinstance(reply, Integer):
-        return b":" + str(reply.value).encode() + CRLF
-    if isinstance(reply, BulkString):
-        if reply.value is None:
-            return b"$-1" + CRLF
-        return b"$" + str(len(reply.value)).encode() + CRLF + reply.value + CRLF
-    if isinstance(reply, Array):
-        if reply.items is None:
-            return b"*-1" + CRLF
-        out = b"*" + str(len(reply.items)).encode() + CRLF
-        for item in reply.items:
-            out += serialize(item)
-        return out
-    raise TypeError(f"cannot serialize value of type {type(reply).__name__}")
 
 
 # --------------------------------------------------------------------------- #

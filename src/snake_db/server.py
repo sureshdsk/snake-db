@@ -55,10 +55,10 @@ class RedisServer:
                         if args is None:
                             break
                         reply = self.registry.dispatch(args)
-                        conn.sendall(protocol.serialize(reply))
+                        conn.sendall(reply.serialize())
                 except protocol.ProtocolError as exc:
                     conn.sendall(
-                        protocol.serialize(protocol.Error(f"ERR Protocol error: {exc}"))
+                        protocol.Error(f"ERR Protocol error: {exc}").serialize()
                     )
                     break
         except (ConnectionError, OSError):
