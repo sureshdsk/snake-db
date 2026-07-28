@@ -10,7 +10,6 @@ from snake_db.protocol import (
     CommandReader,
     Error,
     Integer,
-    serialize,
 )
 
 # --------------------------------------------------------------------------- #
@@ -19,32 +18,32 @@ from snake_db.protocol import (
 
 
 def test_serialize_simple_string() -> None:
-    assert serialize(OK) == b"+OK\r\n"
+    assert OK.serialize() == b"+OK\r\n"
 
 
 def test_serialize_error() -> None:
-    assert serialize(Error("WRONGTYPE foo")) == b"-WRONGTYPE foo\r\n"
+    assert Error("WRONGTYPE foo").serialize() == b"-WRONGTYPE foo\r\n"
 
 
 def test_serialize_integer() -> None:
-    assert serialize(Integer(42)) == b":42\r\n"
-    assert serialize(Integer(-7)) == b":-7\r\n"
+    assert Integer(42).serialize() == b":42\r\n"
+    assert Integer(-7).serialize() == b":-7\r\n"
 
 
 def test_serialize_bulk_string() -> None:
-    assert serialize(BulkString(b"hello")) == b"$5\r\nhello\r\n"
+    assert BulkString(b"hello").serialize() == b"$5\r\nhello\r\n"
 
 
 def test_serialize_nil_bulk_string() -> None:
-    assert serialize(NIL) == b"$-1\r\n"
+    assert NIL.serialize() == b"$-1\r\n"
 
 
 def test_serialize_empty_bulk_string() -> None:
-    assert serialize(BulkString(b"")) == b"$0\r\n\r\n"
+    assert BulkString(b"").serialize() == b"$0\r\n\r\n"
 
 
 def test_serialize_array() -> None:
-    assert serialize(Array([Integer(1), BulkString(b"x")])) == b"*2\r\n:1\r\n$1\r\nx\r\n"
+    assert Array([Integer(1), BulkString(b"x")]).serialize() == b"*2\r\n:1\r\n$1\r\nx\r\n"
 
 
 # --------------------------------------------------------------------------- #

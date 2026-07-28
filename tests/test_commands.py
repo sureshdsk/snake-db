@@ -6,7 +6,6 @@ import pytest
 
 from snake_db.commands import CommandRegistry, build_default_registry
 from snake_db.db import SnakeDB
-from snake_db.protocol import serialize
 
 
 @pytest.fixture
@@ -58,7 +57,7 @@ def test_unknown_command_returns_error(registry: CommandRegistry) -> None:
 def _dispatch_reply(registry: CommandRegistry, *args: bytes):
     """Dispatch and decode the reply into a ``(kind, value)`` tuple."""
     reply = registry.dispatch(list(args))
-    return _decode_first(serialize(reply))
+    return _decode_first(reply.serialize())
 
 
 def _decode_first(data: bytes):
