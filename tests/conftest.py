@@ -7,7 +7,7 @@ import threading
 
 import pytest
 
-from helpers import wait_for_port
+from helpers import RespClient, wait_for_port
 from snake_db.server import serve
 
 
@@ -31,3 +31,12 @@ def server(free_port: int):
     thread.start()
     wait_for_port(host, free_port)
     yield (host, free_port)
+
+
+@pytest.fixture
+def client(server):
+    """A ``RespClient`` connected to the ``server`` fixture, closed after."""
+    host, port = server
+    cli = RespClient(host, port)
+    yield cli
+    cli.close()
