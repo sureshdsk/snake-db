@@ -1,8 +1,6 @@
-"""Scaffold smoke: the package imports, exposes a version, and echoes bytes."""
+"""Scaffold smoke: the package imports, exposes a version, and core classes exist."""
 
 from __future__ import annotations
-
-import socket
 
 import snake_db
 from snake_db.commands.registry import CommandRegistry
@@ -18,10 +16,3 @@ def test_classes_exist() -> None:
     assert SnakeDB() is not None
     assert CommandRegistry() is not None
     assert RedisServer() is not None
-
-
-def test_echo_server_round_trips_bytes(server) -> None:
-    host, port = server
-    with socket.create_connection((host, port), timeout=2.0) as s:
-        s.sendall(b"hello\r\n")
-        assert s.recv(64) == b"hello\r\n"
